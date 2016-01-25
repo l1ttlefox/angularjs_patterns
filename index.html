@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Тестовое задание</title>
+
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/posts.css">
+</head>
+<body>
+
+    <div class="container">
+
+        <header id="header">
+            <div class="page-header">
+                <h1>Тестовое задание</h1>
+            </div>
+            <h2>Задача:</h2>
+            <ol>
+                <li>Используя коллекцию <code>json/posts.json</code> заполнить базовыми значениями <code>localStorage</code> пользователя, вывести записи в <code>#posts</code>, взяв за основу разметку <code>#posts article</code>.</li>
+                <li>Возможность удаления записи из <code>localStorage</code>.</li>
+                <li>Форма добавления записи, валидация данных.</li>
+            </ol>
+            <p class="alert alert-info">Ограничений по использованию библиотек, кроссбраузерности &mdash; нет.</p>
+        </header>
+
+        <section>
+            <div id="posts" class="well"></div> <!-- /#posts -->
+            
+            <form id="post-add" class="col-lg-4" onsubmit="return false;">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="title" placeholder="заголовок">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" name="body" placeholder="запись">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" name="tags" placeholder="тег, еще тег">
+                </div>
+                <button onclick="add_articles();" type="submit" class="btn btn-primary">Добавить</button>
+            </form> <!-- /#post-add -->
+
+        </section>
+<script>
+    var test_var = JSON.parse(localStorage.getItem("articles"));
+    if(test_var == null){
+        // url file
+        var link_file = '/json/posts.json';
+        //read file
+        var jsonData = loadUrlData(link_file);
+        //save LS
+        localStorage.setItem("articles", jsonData);
+    }
+    init_form();
+
+    function init_form(){
+        var retObj = JSON.parse(localStorage.getItem("articles"));
+
+        for(var index=0; index <= retObj.length;  index++){
+            form_exp = '<article id="art_'+index+'"> <header> ' +
+                    '<h3>'+retObj[index].title+'</h3> </header> ' +
+                    '<section> ' +
+                    '<p>'+retObj[index].body+'</p> ' +
+                    '</section> ' +
+                    '<footer>' +
+                    '<div class="tags">';
+            for(var index_tag=0; index_tag <= retObj[index].tags.length;  index_tag++){
+                if(retObj[index].tags[index_tag] != undefined){
+                    form_exp += '<button class="btn btn-xs btn-default">'+retObj[index].tags[index_tag]+'</button>';
+                }
+            }
+            form_exp += '</div>' +
+                    '</footer>' +
+                    '<div class="controls">' +
+                    '<button onclick="DeleteLC_Articl('+index+')" class="btn btn-danger btn-mini">удалить</button>' +
+                    '</div>' +
+                    '</article>';
+            document.getElementById('posts').innerHTML+=form_exp;
+        }
+    }
+    function form_clear(){
+        document.getElementById('posts').innerHTML='';
+    }
+    function DeleteLC_Articl(uid){
+        var retObj = JSON.parse(localStorage.getItem("articles"));
+        retObj.splice(uid, 1);
+        localStorage.setItem("articles", JSON.stringify(retObj));
+        var element = document.getElementById("art_"+uid);
+        element.parentNode.removeChild(element);
+    }
+    function add_articles(){
+        var forms_data = document.getElementsByClassName('form-control');
+        var new_obj = new Object();
+        for( var ind=0; ind <= forms_data.length; ind++){
+            if(forms_data[ind] == undefined) continue;
+            switch (forms_data[ind].name) {
+                case 'title':
+                        if(forms_data[ind].value.length > 0){
+                            new_obj['title'] = forms_data[ind].value;
+                        }else{
+                            alert('All fields must be filled');
+                            return false;
+                        }
+                    break;
+                case 'body':
+                        if(forms_data[ind].value.length > 0){
+                            new_obj['body'] = forms_data[ind].value;
+                        }else{
+                            alert('All fields must be filled');
+                            return false;
+                        }   break;
+                case 'tags':
+                        if(forms_data[ind].value.length > 0){
+                            new_obj['tags'] = forms_data[ind].value.split(',');
+                        }else{
+                            alert('All fields must be filled');
+                            return false;
+                        }   break;
+                default: break;
+            }
+        }
+        // push data
+        var retObj = JSON.parse(localStorage.getItem("articles"));
+        retObj.push(new_obj);
+        localStorage.setItem("articles", JSON.stringify(retObj));
+
+        //clear input:
+        for( var ind=0; ind <= forms_data.length; ind++){
+            if(forms_data[ind] == undefined) continue;
+            forms_data[ind].value='';
+        }
+
+        //clea form
+        form_clear();
+
+        //create new form
+        init_form();
+    }
+
+    //load data
+    function loadUrlData(url) {
+        var oRequest = new XMLHttpRequest();
+        oRequest.open('GET', url, false);
+        oRequest.setRequestHeader("User-Agent", navigator.userAgent);
+        oRequest.send(null);
+        return oRequest.responseText;
+    };
+</script>
+    </div>
+</body>
+</html>
